@@ -453,6 +453,108 @@ def runHoritontal(matrix, original_matrix):
                 bottom_threshold = bottom_threshold + 1
         d_total_count = d_total_count + 1
 
+def left_edge_connected(matrix, y, x):
+    if matrix[y-1][x-1] == 0 or matrix[y][x-1] == 0 or matrix[y+1][x-1] == 0:
+        return True
+    else:
+        return False
+
+def right_edge_connected(matrix, y, x):
+    if matrix[y-1][x+1] == 0 or matrix[y][x+1] == 0 or matrix[y+1][x+1] == 0:
+        return True
+    else:
+        return False
+
+def top_edge_connected(matrix, y, x):
+    if matrix[y-1][x-1] == 0 or matrix[y][x] == 0 or matrix[y+1][x+1] == 0:
+        return True
+    else:
+        return False
+
+def bottom_edge_connected(matrix, y, x):
+    if matrix[y+1][x-1] == 0 or matrix[y+1][x] == 0 or matrix[y+1][x+1] == 0:
+        return True
+    else:
+        return False
+
+def check_line_candidate(matrix, y, x):
+    edge_count = 0
+    # Left
+    if  matrix[y+2][x-2] == 0 \
+       or matrix[y+1][x-2] == 0 \
+       or matrix[y][x-2] == 0 \
+       or matrix[y-1][x-2] == 0 \
+       or matrix[y-2][x-2] == 0:
+        if left_edge_connected(matrix, y, x):
+            edge_count = edge_count + 1
+            print "left edge"
+    # Right
+    if  matrix[y+2][x+2] == 0 \
+       or matrix[y+1][x+2] == 0 \
+       or matrix[y][x+2] == 0 \
+       or matrix[y-1][x+2] == 0 \
+       or matrix[y-2][x+2] == 0:
+        if right_edge_connected(matrix, y, x):
+            edge_count = edge_count + 1
+            print "right edge"
+    # Top
+    if  matrix[y-2][x-2] == 0 \
+       or matrix[y-2][x-1] == 0 \
+       or matrix[y-2][x] == 0 \
+       or matrix[y-2][x+1] == 0 \
+       or matrix[y-2][x+2] == 0:
+        if top_edge_connected(matrix, y, x):
+            edge_count = edge_count + 1
+            print "top edge"
+    # Bottom
+    if  matrix[y+2][x-2] == 0 \
+       or matrix[y+2][x-1] == 0 \
+       or matrix[y+2][x] == 0 \
+       or matrix[y+2][x+1] == 0 \
+       or matrix[y+2][x+2] == 0:
+        if bottom_edge_connected(matrix, y, x):
+            edge_count = edge_count + 1
+            print "bottom edge"
+
+    return (edge_count == 2)
+
+def removeLine(matrix, y, x):
+    height = len(matrix)
+    width = len(matrix[0])
+    white = 1
+    black = 0
+    threshold_to_not_exceed = BW_LIMIT
+    box_size = 6
+    matrix[y][x] = white
+    #print(" deleting %0d:%d" % (y, x))
+    if x > 0:
+        if matrix[y][x-1] == black and blackPixelBoxThresholdNotExceeded(matrix, x-1, y, threshold_to_not_exceed, box_size):
+            removeLine(matrix, y, x-1);
+    if y > 0:
+        if matrix[y-1][x] == black and blackPixelBoxThresholdNotExceeded(matrix, x, y-1, threshold_to_not_exceed, box_size):
+            removeLine(matrix, y-1, x);
+    if x < width-1:
+        if matrix[y][x+1] == black and blackPixelBoxThresholdNotExceeded(matrix, x+1, y, threshold_to_not_exceed, box_size):
+            removeLine(matrix, y, x+1);
+    if y < height-1:
+        if matrix[y+1][x] == black and blackPixelBoxThresholdNotExceeded(matrix, x, y+1, threshold_to_not_exceed, box_size):
+            removeLine(matrix, y+1, x);
+
+def removeLines(matrix):
+    #matrix_copy = deepcopy(matrix) 
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 2
+    while column_index < (height-3):
+        row_index = 2
+        while row_index < (width-3):
+            if matrix[column_index][row_index] == 0:
+                if check_line_candidate(matrix, column_index, row_index):
+                    print(" deleting %0d:%d" % (column_index, row_index))
+                    removeLine(matrix, column_index, row_index)
+            row_index = row_index+1
+        column_index = column_index + 1
+    return matrix
 
 #mod_matrix = doHorizontalEditingAndReturnNewMatrix(bwMatrix, 60)
 #save_image(mod_matrix, "after_hor.jpeg")
@@ -461,8 +563,15 @@ def runHoritontal(matrix, original_matrix):
 ####################################################
 (width, height, matrix) = openImageAsArray()
 
+
+
 bwMatrix = convertToBW(matrix)
 save_image( bwMatrix, "bp.jpeg" )
+
+##
+newMatrix = removeLines(bwMatrix)
+save_image(newMatrix, "after_lines_removed.jpeg")
+##
 
 ##
 run(bwMatrix, bwMatrix)
