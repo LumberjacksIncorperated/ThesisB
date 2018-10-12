@@ -477,53 +477,153 @@ def bottom_edge_connected(matrix, y, x):
     else:
         return False
 
-def check_line_candidate(matrix, y, x):
-    edge_count = 0
-    # Left
-    if  matrix[y+2][x-2] == 0 \
-       or matrix[y+1][x-2] == 0 \
-       or matrix[y][x-2] == 0 \
-       or matrix[y-1][x-2] == 0 \
-       or matrix[y-2][x-2] == 0:
-        if left_edge_connected(matrix, y, x):
-            edge_count = edge_count + 1
-            print "left edge"
-    # Right
-    if  matrix[y+2][x+2] == 0 \
-       or matrix[y+1][x+2] == 0 \
-       or matrix[y][x+2] == 0 \
-       or matrix[y-1][x+2] == 0 \
-       or matrix[y-2][x+2] == 0:
-        if right_edge_connected(matrix, y, x):
-            edge_count = edge_count + 1
-            print "right edge"
-    # Top
-    if  matrix[y-2][x-2] == 0 \
-       or matrix[y-2][x-1] == 0 \
-       or matrix[y-2][x] == 0 \
-       or matrix[y-2][x+1] == 0 \
-       or matrix[y-2][x+2] == 0:
-        if top_edge_connected(matrix, y, x):
-            edge_count = edge_count + 1
-            print "top edge"
-    # Bottom
-    if  matrix[y+2][x-2] == 0 \
-       or matrix[y+2][x-1] == 0 \
-       or matrix[y+2][x] == 0 \
-       or matrix[y+2][x+1] == 0 \
-       or matrix[y+2][x+2] == 0:
-        if bottom_edge_connected(matrix, y, x):
-            edge_count = edge_count + 1
-            print "bottom edge"
+def makeBoxCircumferenceForPixel(matrix, y, x, boxSize):
+    boxCircumference = []
+    leftBoundary = x - boxSize/2
+    topBoundary = y - boxSize/2
+    rightBoundary = x + boxSize/2
+    bottomBoundary = y + boxSize/2
+    width = len(matrix[0])
+    height = len(matrix)
 
-    return (edge_count == 2)
+    x = leftBoundary
+    while x != rightBoundary:
+        boxCircumference = boxCircumference + [matrix[topBoundary][x]]
+        x = x + 1
+
+    y = topBoundary+1
+    while y != bottomBoundary:
+        boxCircumference = boxCircumference + [matrix[y][rightBoundary]]
+        y = y + 1
+
+    x = rightBoundary-1
+    while x != leftBoundary:
+        boxCircumference = boxCircumference + [matrix[bottomBoundary][x]]
+        x = x - 1
+
+    y = bottomBoundary-1
+    while y != topBoundary+1:
+        boxCircumference = boxCircumference + [matrix[y][leftBoundary]]
+        y = y - 1
+
+    return boxCircumference
+
+def boxTotal(matrix, y, x, boxSize):
+    column_index = x - boxSize/2
+    row_index = y - boxSize/2
+    columnMax = x + boxSize/2
+    rowMax = y + boxSize/2
+    blackCount = 0
+    while row_index < rowMax:
+        column_index = x - boxSize/2
+        while column_index < columnMax:
+            if matrix[row_index][column_index] == 0:
+                blackCount = blackCount + 1
+            column_index = column_index + 1
+        row_index = row_index + 1
+    return blackCount
+
+def twoContinuousOfLess2SegmentsInBox(boxCirumference, boxSize):
+    countToPreventInfinateLoop = len(boxCirumference)
+    while boxCirumference[0] == 0 and countToPreventInfinateLoop > 0:
+        countToPreventInfinateLoop = countToPreventInfinateLoop-1
+        lastIndex = len(boxCirumference)-1
+        temp = boxCirumference[lastIndex]
+        del boxCirumference[lastIndex]
+        boxCirumference = [temp] + boxCirumference
+    print(boxCirumference)
+    currentContCount = 0
+    currentSegmentCount = 0
+    currentlyBlack = False
+    boxLength = len(boxCirumference)
+    print "boxlen - %d" % (boxLength)
+    lengthThreshold = boxSize
+    lengthCounter = 0
+    boxIndex = 0
+    firstSegmentFound = False
+    while boxIndex < boxLength - 1:
+        print "box index = %d" % (boxIndex)
+        if not currentlyBlack:
+            print "not black"
+            if boxCirumference[boxIndex] == 0:
+                print "found first black"
+                currentlyBlack = True
+                currentSegmentCount = currentSegmentCount + 1
+                if currentSegmentCount > 2:
+                    print "false cause more segments"
+                    return False
+                currentContCount = currentContCount + 1
+                if lengthCounter < lengthThreshold and firstSegmentFound:
+                    print "FALSE"
+                    return False
+            else:
+                if firstSegmentFound:
+                    print "increase it"
+                    lengthCounter = lengthCounter + 1
+        else:
+            if boxCirumference[boxIndex] == 0:
+                print "conintue black"
+                currentContCount = currentContCount + 1
+                if currentContCount > 2:
+                    print "false for contunity count"
+                    return False
+            else:
+                print "now not black"
+                currentlyBlack = False
+                currentContCount = 0
+                firstSegmentFound = True
+                lengthCounter = 1
+        boxIndex = boxIndex + 1
+    if currentSegmentCount == 2:
+        return True
+    else:
+        return False
+
+def connectedInBoxTotalRecursively(matrix, y, x, leftBoundary, topBoundary, rightBoundary, bottomBoundary):
+    matrix[y][x] = 1
+    count = 1
+    if x-1 >= leftBoundary and matrix[y][x-1] == 0:
+        count = count + connectedInBoxTotalRecursively(matrix, y, x-1, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
+    if x+1 <- rightBoundary and matrix[y][x+1] == 0:
+        count = count + connectedInBoxTotalRecursively(matrix, y, x+1, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
+    if y-1 >= topBoundary and matrix[y-1][x] == 0:
+        count = count + connectedInBoxTotalRecursively(matrix, y-1, x, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
+    if y+1 >= bottomBoundary and matrix[y+1][x] == 0:
+        count = count + connectedInBoxTotalRecursively(matrix, y+1, x, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
+    return count
+
+def connectedInBoxTotal(matrix, y, x, boxSize):
+    matrix_copy = deepcopy(matrix)
+    leftBoundary = x - boxSize/2
+    topBoundary = y - boxSize/2
+    rightBoundary = x + boxSize/2
+    bottomBoundary = y + boxSize/2
+    connectedTotal = connectedInBoxTotalRecursively(matrix, y, x, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
+    return connectedTotal
+
+
+def check_line_candidate(matrix, y, x):
+    boxSize = 6
+    boxThreshold = 11
+    boxCirumference = makeBoxCircumferenceForPixel(matrix, y, x, boxSize)
+    theBoxTotal = boxTotal(matrix, y, x, boxSize)
+    print(boxCirumference)
+    print(theBoxTotal)
+    if theBoxTotal < boxThreshold and theBoxTotal > boxSize:
+        print "here"
+        if twoContinuousOfLess2SegmentsInBox(boxCirumference, boxSize):
+            bt = connectedInBoxTotal(matrix, y, x, boxSize)
+            print "oh...... potential with total %d:%d" % (theBoxTotal, bt)
+            #if connectedInBoxTotal(matrix, y, x, boxSize) == theBoxTotal:
+            return True
+    return False
 
 def removeLine(matrix, y, x):
     height = len(matrix)
     width = len(matrix[0])
     white = 1
     black = 0
-    threshold_to_not_exceed = BW_LIMIT
+    threshold_to_not_exceed = 5
     box_size = 6
     matrix[y][x] = white
     #print(" deleting %0d:%d" % (y, x))
@@ -542,12 +642,16 @@ def removeLine(matrix, y, x):
 
 def removeLines(matrix):
     #matrix_copy = deepcopy(matrix) 
+    #check_line_candidate(matrix, 49, 250)
+    #removeLine(matrix, 49, 250)
+    #return matrix
+
     height = len(matrix)
     width = len(matrix[0])
-    column_index = 2
-    while column_index < (height-3):
-        row_index = 2
-        while row_index < (width-3):
+    column_index = 3
+    while column_index < (height-4):
+        row_index = 3
+        while row_index < (width-4):
             if matrix[column_index][row_index] == 0:
                 if check_line_candidate(matrix, column_index, row_index):
                     print(" deleting %0d:%d" % (column_index, row_index))
