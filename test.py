@@ -660,28 +660,130 @@ def removeLines(matrix):
         column_index = column_index + 1
     return matrix
 
+def getBlackPixelCount(matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    black_pixel_counter = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if matrix[column_index][row_index] == 0:
+                black_pixel_counter = black_pixel_counter + 1
+            row_index = row_index+1
+        column_index = column_index + 1
+    return black_pixel_counter
+
+def getMinXandXlength(matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    firstFound = False
+    minBlack = 0
+    maxBlack = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if matrix[column_index][row_index] == 0:
+                if not firstFound:
+                    firstFound = True
+                    minBlack = row_index
+                    maxBlack = row_index
+                else:
+                    if row_index < minBlack:
+                        minBlack = row_index
+                    if row_index > maxBlack:
+                        maxBlack = row_index
+            row_index = row_index+1
+        column_index = column_index + 1
+    return (minBlack, maxBlack)    
+
+def getMinYandYlength(matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    firstFound = False
+    minBlack = 0
+    maxBlack = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if matrix[column_index][row_index] == 0:
+                if not firstFound:
+                    firstFound = True
+                    minBlack = column_index
+                    maxBlack = column_index
+                else:
+                    if column_index < minBlack:
+                        minBlack = column_index
+                    if column_index > maxBlack:
+                        maxBlack = column_index
+            row_index = row_index+1
+        column_index = column_index + 1
+    return (minBlack, maxBlack)  
+
+def getNumberOriginalBlackPixels(new_matrix, original_matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    blackCount = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if new_matrix[column_index][row_index] == 0:
+                if original_matrix[column_index][row_index] == 0:
+                    blackCount = blackCount + 1
+            row_index = row_index+1
+        column_index = column_index + 1
+    return  blackCount
+
+def getNumberOfTransitions(matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    transitionCount = 0
+    currentlyBlack = True
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if matrix[column_index][row_index] == 0:
+                if not currentlyBlack:
+                    transitionCount = transitionCount + 1
+            else:
+                if currentlyBlack:
+                    currentlyBlack = False
+            row_index = row_index+1
+        column_index = column_index + 1
+    return  transitionCount    
+
+
+
 #mod_matrix = doHorizontalEditingAndReturnNewMatrix(bwMatrix, 60)
 #save_image(mod_matrix, "after_hor.jpeg")
 ####################################################
 # MAIN
 ####################################################
 (width, height, matrix) = openImageAsArray()
-
-
-
 bwMatrix = convertToBW(matrix)
-save_image( bwMatrix, "bp.jpeg" )
+mod_matrix = doHorizontalEditingAndReturnNewMatrix(bwMatrix, 200)
+save_image(mod_matrix, "after_hor.jpeg")
+mod_matrix2 = doVerticalEditingAndReturnNewMatrix(bwMatrix, 120)
+save_image(mod_matrix, "after_ver.jpeg")
+final_matrix = andThem(mod_matrix, mod_matrix2, width, height)
+save_image(final_matrix, "final.jpeg")
+#bwMatrix = convertToBW(matrix)
+#save_image( bwMatrix, "bp.jpeg" )
 
 ##
-newMatrix = removeLines(bwMatrix)
-save_image(newMatrix, "after_lines_removed.jpeg")
+#newMatrix = removeLines(bwMatrix)
+#save_image(newMatrix, "after_lines_removed.jpeg")
 ##
 
 ##
-run(bwMatrix, bwMatrix)
-save_image(bwMatrix, "after_run4.jpeg")
-runHoritontal(bwMatrix, bwMatrix)
-save_image(bwMatrix, "after_runHorizontal.jpeg")
+#run(bwMatrix, bwMatrix)
+#save_image(bwMatrix, "after_run4.jpeg")
+#runHoritontal(bwMatrix, bwMatrix)
+#save_image(bwMatrix, "after_runHorizontal.jpeg")
 ##
 
 
