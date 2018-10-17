@@ -584,7 +584,7 @@ def connectedInBoxTotalRecursively(matrix, y, x, leftBoundary, topBoundary, righ
     count = 1
     if x-1 >= leftBoundary and matrix[y][x-1] == 0:
         count = count + connectedInBoxTotalRecursively(matrix, y, x-1, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
-    if x+1 <- rightBoundary and matrix[y][x+1] == 0:
+    if x+1 <= rightBoundary and matrix[y][x+1] == 0:
         count = count + connectedInBoxTotalRecursively(matrix, y, x+1, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
     if y-1 >= topBoundary and matrix[y-1][x] == 0:
         count = count + connectedInBoxTotalRecursively(matrix, y-1, x, leftBoundary, topBoundary, rightBoundary, bottomBoundary)
@@ -641,24 +641,24 @@ def removeLine(matrix, y, x):
             removeLine(matrix, y+1, x);
 
 def removeLines(matrix):
-    #matrix_copy = deepcopy(matrix) 
+    matrix_copy = deepcopy(matrix) 
     #check_line_candidate(matrix, 49, 250)
     #removeLine(matrix, 49, 250)
     #return matrix
 
-    height = len(matrix)
-    width = len(matrix[0])
+    height = len(matrix_copy)
+    width = len(matrix_copy[0])
     column_index = 3
     while column_index < (height-4):
         row_index = 3
         while row_index < (width-4):
-            if matrix[column_index][row_index] == 0:
-                if check_line_candidate(matrix, column_index, row_index):
+            if matrix_copy[column_index][row_index] == 0:
+                if check_line_candidate(matrix_copy, column_index, row_index):
                     print(" deleting %0d:%d" % (column_index, row_index))
-                    removeLine(matrix, column_index, row_index)
+                    removeLine(matrix_copy, column_index, row_index)
             row_index = row_index+1
         column_index = column_index + 1
-    return matrix
+    return matrix_copy
 
 def getBlackPixelCount(matrix):
     height = len(matrix)
@@ -723,8 +723,8 @@ def getMinYandYlength(matrix):
     return (minBlack, maxBlack)  
 
 def getNumberOriginalBlackPixels(new_matrix, original_matrix):
-    height = len(matrix)
-    width = len(matrix[0])
+    height = len(new_matrix)
+    width = len(new_matrix[0])
     column_index = 0
     blackCount = 0
     while column_index < (height-1):
@@ -742,13 +742,14 @@ def getNumberOfTransitions(matrix):
     width = len(matrix[0])
     column_index = 0
     transitionCount = 0
-    currentlyBlack = True
+    currentlyBlack = False
     while column_index < (height-1):
         row_index = 0
         while row_index < (width-1):
             if matrix[column_index][row_index] == 0:
                 if not currentlyBlack:
                     transitionCount = transitionCount + 1
+                    currentlyBlack = True
             else:
                 if currentlyBlack:
                     currentlyBlack = False
@@ -756,28 +757,141 @@ def getNumberOfTransitions(matrix):
         column_index = column_index + 1
     return  transitionCount    
 
+def getBWmatrix():
+    (width, height, matrix) = openImageAsArray()
+    bwMatrix = convertToBW(matrix)
+    return (width, height, bwMatrix) 
+
+def fillMatrix(matrix, y, x):
+    height = len(matrix)
+    width = len(matrix[0])
+    print("x: %d y: %d" % (x, y))
+    print("fill")
+    print("%d %d %d %d" % (matrix[y][x-1], matrix[y][x+1], matrix[y-1][x], matrix[y+1][x]))
+    matrix[y][x] = 2
+    
+    #if matrix[y][x-1] == 0:
+    #    fillMatrix(matrix, y, x-1)
+    #if matrix[y][x+1] == 0:
+    #    fillMatrix(matrix, y, x+1)
+    #if matrix[y-1][x] == 0:
+    #    fillMatrix(matrix, y-1, x)
+    #if matrix[y+1][x] == 0:
+    #    fillMatrix(matrix, y+1, x)
+
+    foundOne = False
+    while(True):
+        # find a two, check all around it
+        column_index = 0
+        while column_index < (height-1):
+            row_index = 0
+            while row_index < (width-1):
+                if matrix[column_index][row_index] == 2:
+                    print("Found a two %d %d" % (column_index, row_index))
+                    # Check all around it and make it 2's
+                    if matrix[column_index][row_index-1] == 0:
+                        matrix[column_index][row_index-1] = 2
+                        foundOne = True
+                    if matrix[column_index][row_index+1] == 0:
+                        matrix[column_index][row_index+1] = 2
+                        foundOne = True
+                    if matrix[column_index-1][row_index] == 0:
+                        matrix[column_index-1][row_index] = 2
+                        foundOne = True
+                    if matrix[column_index+1][row_index] == 0:
+                        matrix[column_index+1][row_index] = 2
+                        foundOne = True
+                row_index = row_index+1
+            column_index = column_index + 1
+        if row_index == width-1 and column_index == height-1:
+            return
+
+    #if x-1 >= leftBoundary and y-1 >= topBoundary and matrix[y-1][x-1] == 0:
+    #    fillMatrix(matrix, y-1, x-1)
+    #if x-1 >= leftBoundary and y+1 >= bottomBoundary and matrix[y][x-1] == 0:
+    #    fillMatrix(matrix, y+1, x-1)
+    #if x+1 <= rightBoundary and y-1 >= topBoundary and matrix[y][x+1] == 0:
+    #    fillMatrix(matrix, y-1, x+1)
+    #if x+1 <= rightBoundary and  y+1 >= bottomBoundary and matrix[y][x+1] == 0:
+        #fillMatrix(matrix, y+1, x+1)   
+
+def set_to_zero(matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            matrix[column_index][row_index] = 0
+            row_index = row_index+1
+        column_index = column_index + 1
+
+def changeAllButTwo(matrix):
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if not (matrix[column_index][row_index] == 2):
+                matrix[column_index][row_index] = 1
+            if (matrix[column_index][row_index] == 2):
+                print("found a 2")
+                matrix[column_index][row_index] = 0
+            row_index = row_index+1
+        column_index = column_index + 1
+
+def getCalculations(matrix, original_matrix):
+    print(getBlackPixelCount(matrix))
+    print(getMinXandXlength(matrix))
+    print(getMinYandYlength(matrix))
+    print(getNumberOriginalBlackPixels(matrix, original_matrix))
+    print(getNumberOfTransitions(matrix))
+
+def loopThroughConnectedComponents(matrix):
+    matrix_copy_to_return = deepcopy(matrix)
+    set_to_zero(matrix_copy_to_return)
+    matrix_copy = deepcopy(matrix) 
+    height = len(matrix)
+    width = len(matrix[0])
+    column_index = 0
+    while column_index < (height-1):
+        row_index = 0
+        while row_index < (width-1):
+            if matrix_copy[column_index][row_index] == 0:
+                fillMatrix(matrix_copy, column_index, row_index) # We are just doing one connected component for now
+                print("after fill")
+                changeAllButTwo(matrix_copy)
+                save_image(matrix_copy, "after_two.jpeg")
+                print("after chgange")
+                getCalculations(matrix_copy, matrix)
+                # If calculations are not text, take it out, as in white out the pixels in the original image
+                # then for our deleted line before we should remember what it is to put it back
+                return
+            row_index = row_index+1
+        column_index = column_index + 1  
 
 
-#mod_matrix = doHorizontalEditingAndReturnNewMatrix(bwMatrix, 60)
-#save_image(mod_matrix, "after_hor.jpeg")
 ####################################################
 # MAIN
 ####################################################
-(width, height, matrix) = openImageAsArray()
-bwMatrix = convertToBW(matrix)
-mod_matrix = doHorizontalEditingAndReturnNewMatrix(bwMatrix, 200)
+(width, height, bwMatrix) = getBWmatrix()
+
+# Step One: Remove Line and Make Copy
+lineRemovedMatrix = removeLines(bwMatrix)
+save_image(lineRemovedMatrix, "after_lines_removed.jpeg")
+
+# Step Two: Do RLSA
+mod_matrix = doHorizontalEditingAndReturnNewMatrix(lineRemovedMatrix, 200)
 save_image(mod_matrix, "after_hor.jpeg")
-mod_matrix2 = doVerticalEditingAndReturnNewMatrix(bwMatrix, 120)
-save_image(mod_matrix, "after_ver.jpeg")
+mod_matrix2 = doVerticalEditingAndReturnNewMatrix(lineRemovedMatrix, 120)
+save_image(mod_matrix2, "after_ver.jpeg")
 final_matrix = andThem(mod_matrix, mod_matrix2, width, height)
 save_image(final_matrix, "final.jpeg")
-#bwMatrix = convertToBW(matrix)
-#save_image( bwMatrix, "bp.jpeg" )
 
-##
-#newMatrix = removeLines(bwMatrix)
-#save_image(newMatrix, "after_lines_removed.jpeg")
-##
+# Step Three: Loop through connected components
+print("here")
+loopThroughConnectedComponents(final_matrix)
 
 ##
 #run(bwMatrix, bwMatrix)
@@ -785,6 +899,8 @@ save_image(final_matrix, "final.jpeg")
 #runHoritontal(bwMatrix, bwMatrix)
 #save_image(bwMatrix, "after_runHorizontal.jpeg")
 ##
+
+
 
 
 
