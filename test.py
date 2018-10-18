@@ -842,9 +842,9 @@ def changeAllButTwo(matrix):
             row_index = row_index+1
         column_index = column_index + 1
 
-def checkIfShouldBeAdded(matrix, original_matrix):
+def checkIfShouldBeDeleted(matrix, original_matrix):
     delta_x = getCalculations(matrix, original_matrix)
-    if delta_x > 200:
+    if delta_x < 200:
         return True
     else:
         return False
@@ -855,7 +855,7 @@ def getCalculations(matrix, original_matrix):
     DC = getNumberOriginalBlackPixels(matrix, original_matrix)
     (mi_y, ma_y) = getMinYandYlength(matrix)
     delta_y = ma_y-mi_y
-    (mi_x, ma_x) = getMinYandYlength(matrix)
+    (mi_x, ma_x) = getMinXandXlength(matrix)
     delta_x = ma_x-mi_x
     
     e  = 0
@@ -912,8 +912,8 @@ def deleteMatrixFromMatrix(map_matrix, matrix):
         column_index = column_index + 1
 
 def loopThroughConnectedComponents(matrix, original_matrix):
-    matrix_of_pieces_to_keep = deepcopy(matrix)
-    set_to_zero(matrix_of_pieces_to_keep)
+    matrix_of_pieces_to_delete = deepcopy(matrix)
+    set_to_zero(matrix_of_pieces_to_delete)
     matrix_copy = deepcopy(matrix) 
     height = len(matrix)
     width = len(matrix[0])
@@ -925,8 +925,8 @@ def loopThroughConnectedComponents(matrix, original_matrix):
                 fillMatrix(matrix_copy, column_index, row_index) # We are just doing one connected component for now
                 changeAllButTwo(matrix_copy)
                 #save_image(matrix_copy, "after_two.jpeg")
-                if checkIfShouldBeAdded(matrix_copy, original_matrix):
-                    drawOnPiece(matrix_of_pieces_to_keep, matrix_copy)
+                if checkIfShouldBeDeleted(matrix_copy, original_matrix):
+                    drawOnPiece(matrix_of_pieces_to_delete, matrix_copy)
                 #
                 # Delete this from original matrix
                 deleteMatrixFromMatrix(matrix_copy, matrix)
@@ -935,7 +935,7 @@ def loopThroughConnectedComponents(matrix, original_matrix):
                 #return matrix_of_pieces_to_keep
             row_index = row_index+1
         column_index = column_index + 1
-    return matrix_of_pieces_to_keep
+    return matrix_of_pieces_to_delete
 
 def drawPiecesOntoCanvas(canvas_matrix, map_matrix, original_matrix):
     height = len(original_matrix)
@@ -968,7 +968,7 @@ lineRemovedMatrix = removeLines(bwMatrix)
 save_image(lineRemovedMatrix, "after_lines_removed.jpeg")
 
 # Step Two: Do RLSA
-mod_matrix = doHorizontalEditingAndReturnNewMatrix(lineRemovedMatrix, 120)
+mod_matrix = doHorizontalEditingAndReturnNewMatrix(lineRemovedMatrix, 300)
 save_image(mod_matrix, "after_hor.jpeg")
 mod_matrix2 = doVerticalEditingAndReturnNewMatrix(lineRemovedMatrix, 500)
 save_image(mod_matrix2, "after_ver.jpeg")
@@ -986,8 +986,13 @@ deleteMatrixFromMatrix(matrix_of_pieces_to_delete, bwMatrix)
 save_image(bwMatrix, "matrix_to_remove_line2.jpeg")
 
 # Step Four: Finally run remove line
+lineRemovedMatrix = removeLines(bwMatrix)
+save_image(lineRemovedMatrix, "1.jpeg")
 run(bwMatrix, bwMatrix)
 save_image(bwMatrix, "complete.jpeg")
+lineRemovedMatrix = removeLines(bwMatrix)
+save_image(lineRemovedMatrix, "2.jpeg")
+
 
 
 
