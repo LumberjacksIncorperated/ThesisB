@@ -203,10 +203,6 @@ def blackPixelBoxThresholdNotExceeded(matrix, x, y, threshold_to_not_exceed, box
     if checkBlackPosition(matrix, width, height, x+1, y+1):
         black_counter = black_counter + maybeIncreaseBlackCount(matrix, width, height, x+2, y+2)
 
-    #if (black_counter > threshold_to_not_exceed):
-    #    print "x = "
-    #    print x
-    #    print y
     return (black_counter < threshold_to_not_exceed)
 
 
@@ -646,10 +642,6 @@ def removeLine(matrix, y, x):
 
 def removeLines(matrix):
     matrix_copy = deepcopy(matrix) 
-    #check_line_candidate(matrix, 49, 250)
-    #removeLine(matrix, 49, 250)
-    #return matrix
-
     height = len(matrix_copy)
     width = len(matrix_copy[0])
     column_index = 3
