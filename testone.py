@@ -398,6 +398,8 @@ def removePotentialLinePixelsInBox(original_matrix, boxLeft, boxTop, boxRight, b
         while row_index < boxBottom:
             if twoOrLessConnected(original_unchanged_matrix, column_index, row_index):
                 original_matrix[row_index][column_index] = 1 # black for now
+                global points_from_line
+                points_from_line = points_from_line + [(row_index,column_index)]
             row_index = row_index + 1
         column_index = column_index+1
 
