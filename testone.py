@@ -398,11 +398,12 @@ def removePotentialLinePixelsInBox(original_matrix, boxLeft, boxTop, boxRight, b
         while row_index < boxBottom:
             if twoOrLessConnected(original_unchanged_matrix, column_index, row_index):
                 original_matrix[row_index][column_index] = 1 # black for now
+                #print("pixel = %d %d %d %d" % (row_index, column_index, boxRight, boxBottom))
                 global points_from_line
                 points_from_line = points_from_line + [(row_index,column_index)]
             row_index = row_index + 1
         column_index = column_index+1
-
+    print("END END END")
 
 def startRemovingBasedOnMiddle(top_threshold, bottom_threshold, middle_threshold, original_matrix):
     matrix_copy = deepcopy(original_matrix) 
@@ -419,11 +420,12 @@ def startRemovingBasedOnMiddle(top_threshold, bottom_threshold, middle_threshold
     while column_position < len(original_matrix[middle_threshold]) - 1:
         row_position = top_threshold
         while row_position < bottom_threshold:
+            print("row position = %d and column_position  = %d" % (row_position, column_position));
             if matrix_copy[row_position][column_position] == 0:
                 (firstBoxLeft, firstBoxTop, firstBoxRight, firstBoxBottom, secondBoxLeft, secondBoxTop, secondBoxRight, secondBoxBottom) = calculateBox(matrix_copy, row_position, top_threshold, bottom_threshold, column_position)
                 removePotentialLinePixelsInBox(original_matrix, firstBoxLeft, firstBoxTop, firstBoxRight, firstBoxBottom, matrix_copy)
                 removePotentialLinePixelsInBox(original_matrix, secondBoxLeft, secondBoxTop, secondBoxRight, secondBoxBottom, matrix_copy)
-                #save_image(original_matrix, "2.jpeg")
+                save_image(original_matrix, "2.jpeg")
             row_position = row_position + 1
         column_position = column_position + 1
 
@@ -992,22 +994,23 @@ lineRemovedMatrix = removeLines(bwMatrix)
 save_image(lineRemovedMatrix, "after_lines_removed.jpeg")
 
 # Step Two: Do RLSA
-#mod_matrix = doHorizontalEditingAndReturnNewMatrix(lineRemovedMatrix, 280)
-#save_image(mod_matrix, "after_hor.jpeg")
-#mod_matrix2 = doVerticalEditingAndReturnNewMatrix(lineRemovedMatrix, 330)
-#save_image(mod_matrix2, "after_ver.jpeg")
-#final_matrix = andThem(mod_matrix, mod_matrix2, width, height)
-#save_image(final_matrix, "final.jpeg")
+mod_matrix = doHorizontalEditingAndReturnNewMatrix(bwMatrix, 110)
+save_image(mod_matrix, "after_hor.jpeg")
+mod_matrix2 = doVerticalEditingAndReturnNewMatrix(bwMatrix, 170)
+save_image(mod_matrix2, "after_ver.jpeg")
+final_matrix = andThem(mod_matrix, mod_matrix2, width, height)
+save_image(final_matrix, "final.jpeg")
+sys.exit()
 
 # Step Three: Loop through connected components
 print("here")
-#matrix_of_pieces_to_delete = loopThroughConnectedComponents(final_matrix, lineRemovedMatrix)
-#save_image(matrix_of_pieces_to_delete, "matrix_of_pieces_to_delete.jpeg")
+matrix_of_pieces_to_delete = loopThroughConnectedComponents(final_matrix, lineRemovedMatrix)
+save_image(matrix_of_pieces_to_delete, "matrix_of_pieces_to_delete.jpeg")
 
 #drawLineBackOne(matrix_to_remove_line)
 #save_image(matrix_to_remove_line, "matrix_to_remove_line1.jpeg")
-#deleteMatrixFromMatrix(matrix_of_pieces_to_delete, bwMatrix)
-#save_image(bwMatrix, "matrix_to_remove_line2.jpeg")
+deleteMatrixFromMatrix(matrix_of_pieces_to_delete, bwMatrix)
+save_image(bwMatrix, "matrix_to_remove_line2.jpeg")
 
 # Step Four: Finally run remove line
 lineRemovedMatrix = removeLines(bwMatrix)
